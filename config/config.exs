@@ -27,4 +27,16 @@ use Mix.Config
 # Configuration from the imported file will override the ones defined
 # here (which is why it is important to import them last).
 #
-#     import_config "#{Mix.env()}.exs"
+
+# Email checker config
+config :email_checker,
+    default_dns: :system,
+    also_dns: [],
+    validations: [Format, MX, SMTP],
+    smtp_retries: 2,
+    timeout_milliseconds: :infinity
+
+config :sqlitex, 
+    db_timeout: 10_000
+
+import_config "#{Mix.env()}.exs"
