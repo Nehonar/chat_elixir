@@ -1,8 +1,9 @@
-defmodule ChatElixir.Web.Controller.NewUserController do
+defmodule ChatElixir.Web.Controller.CreateAccountController do
     @moduledoc """
     
     """
     import Plug.Conn
+    alias ChatElixir.Helpers.SqlitexHelper.InsertData
 
     defmodule State do
         defstruct [
@@ -27,13 +28,14 @@ defmodule ChatElixir.Web.Controller.NewUserController do
         |> check_email()
         |> check_username()
         |> check_password()
+        |> save_user()
         |> send_respond()
     end
 
     def get_params(%State{conn: conn} = state) do
         params = 
             conn.body_params
-        IO.inspect params
+        
         %State{state | params: params}
     end
 
@@ -47,7 +49,7 @@ defmodule ChatElixir.Web.Controller.NewUserController do
         end
     end
 
-    def check_username(%State{params: %{"user" => user}} = state) 
+    def check_username(%State{params: %{"username" => user}} = state) 
         when is_binary(user) and byte_size(user) > 0 do 
             
         state # Return state
@@ -66,6 +68,16 @@ defmodule ChatElixir.Web.Controller.NewUserController do
         %Error{reason: "Password not valid", state: state}
     end
     def check_password(%Error{} = error), do: error
+
+    def save_user(%State{params: params} = state) do 
+       case InsertData.run(params) do
+           {:ok, _state} -> 
+                state
+            {:error, error} ->
+                %Error{reason: error.reason, state: error.state}
+       end
+    end
+    def save_user(%Error{} = error), do: error
 
     def send_respond(%State{conn: conn}) do
         conn

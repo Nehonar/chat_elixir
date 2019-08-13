@@ -19,7 +19,7 @@ defmodule ChatElixir.Helpers.SqlitexHelper do
         ]
     end
 
-    defmodule Create_table do
+    defmodule CreateTable do
         @moduledoc """
         This module is helper to create the table.
         Only for the first time.
@@ -27,7 +27,7 @@ defmodule ChatElixir.Helpers.SqlitexHelper do
         @path_create "lib/db/querys/create.sql"
         alias ChatElixir.Helpers.SqlitexHelper
 
-        def create_table_init() do
+        def run() do
             %State{path_sql_file: @path_create}
             |> SqlitexHelper.read_file()
             |> create_table()
@@ -45,14 +45,14 @@ defmodule ChatElixir.Helpers.SqlitexHelper do
         def create_table(%Error{} = error), do: error
     end
 
-    defmodule Insert_data do
+    defmodule InsertData do
         @moduledoc """
         This module is helper to insert info in db
         """
         @path_insert "lib/db/querys/insert.sql"
         alias ChatElixir.Helpers.SqlitexHelper
 
-        def insert_data_init(params) do
+        def run(params) do
             %State{params: params, path_sql_file: @path_insert}
             |> SqlitexHelper.read_file()
             |> create_sql()
@@ -62,26 +62,26 @@ defmodule ChatElixir.Helpers.SqlitexHelper do
 
         def create_sql(%State{params: params, sql: sql} = state) do
             sql_complete =
-                sql <> "(" <> ~s('#{params.username}', '#{params.email}', '#{params.password}') <> ")"
-            IO.inspect sql_complete
+                sql <> "(" <> ~s('#{params["username"]}', '#{params["email"]}', '#{params["password"]}') <> ")"
+            
             %State{state | sql: sql_complete}
         end
         def create_sql(%Error{} = error), do: error
 
         def insert_params(%State{sql: sql, db_name_users: db_name_users} = state) do
             case Sqlitex.Server.exec(db_name_users, sql) do
-                :ok ->
+                :ok -> 
                     %State{state | exec_state: :ok}
                 {:error, {:constraint, _reason}} ->
                     %Error{reason: "Username already exist", state: state}
             end
         end
-        def insert_params(%Error{} = error), do: error
+        def insert_params(%Error{} = error), do: %{reason: error.reason, state: error.state}
     end
 
     defmodule Update_data do
         @moduledoc """
-        
+        TODO
         """
     end
 
