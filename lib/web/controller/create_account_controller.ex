@@ -32,16 +32,12 @@ defmodule ChatElixir.Web.Controller.CreateAccountController do
         |> send_respond()
     end
 
-    def get_params(%State{conn: conn} = state) do
-        params = 
-            conn.body_params
-        
-        %State{state | params: params}
-    end
+    def get_params(%State{conn: conn} = state), do: %State{state | params: conn.body_params}
 
     def check_email(%State{params: %{"email" => email}} = state) do
-        with true <- EmailChecker.valid?(email, [EmailChecker.Check.Format]),
-             true <- EmailChecker.Check.SMTP.valid?(email)
+        with 
+            true <- EmailChecker.valid?(email, [EmailChecker.Check.Format]),
+            true <- EmailChecker.Check.SMTP.valid?(email)
         do
             state
         else
@@ -54,9 +50,7 @@ defmodule ChatElixir.Web.Controller.CreateAccountController do
             
         state # Return state
     end
-    def check_username(%State{} = state) do 
-        %Error{reason: "Username not valid", state: state}
-    end
+    def check_username(%State{} = state), do: %Error{reason: "Username not valid", state: state}
     def check_username(error), do: error
 
     def check_password(%State{params: %{"password" => pass}} = state)
@@ -64,9 +58,7 @@ defmodule ChatElixir.Web.Controller.CreateAccountController do
             
         state # Return state
     end
-    def check_password(%State{} = state) do
-        %Error{reason: "Password not valid", state: state}
-    end
+    def check_password(%State{} = state), do: %Error{reason: "Password not valid", state: state}
     def check_password(%Error{} = error), do: error
 
     def save_user(%State{params: params} = state) do 
