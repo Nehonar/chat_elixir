@@ -2,6 +2,8 @@ defmodule ChatElixir.Helpers.SqlitexHelper do
     @moduledoc """
     
     """
+    @helper_insert_sql "lib/db/querys/insert.sql"
+    @helper_create_sql "lib/db/querys/create.sql"
 
     defmodule State do
         defstruct [
@@ -24,11 +26,10 @@ defmodule ChatElixir.Helpers.SqlitexHelper do
         This module is helper to create the table.
         Only for the first time.
         """
-        @path_create "lib/db/querys/create.sql"
         alias ChatElixir.Helpers.SqlitexHelper
 
         def run() do
-            %State{path_sql_file: @path_create}
+            %State{path_sql_file: @helper_create_sql}
             |> SqlitexHelper.read_file()
             |> create_table()
             |> SqlitexHelper.return_resp()
@@ -49,11 +50,10 @@ defmodule ChatElixir.Helpers.SqlitexHelper do
         @moduledoc """
         This module is helper to insert info in db
         """
-        @path_insert "lib/db/querys/insert.sql"
         alias ChatElixir.Helpers.SqlitexHelper
 
         def run(params) do
-            %State{params: params, path_sql_file: @path_insert}
+            %State{params: params, path_sql_file: @helper_insert_sql}
             |> SqlitexHelper.read_file()
             |> create_sql()
             |> insert_params()
@@ -90,7 +90,7 @@ defmodule ChatElixir.Helpers.SqlitexHelper do
             {:ok, sql} -> 
                 %State{state | sql: sql}
             _error ->
-                %Error{reason: "I can't read the file to create a table", state: state}
+                %Error{reason: "I can't read the file for create a table", state: state}
         end
     end
 
